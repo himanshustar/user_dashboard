@@ -15,11 +15,11 @@ export const useGoogleLoginHandler = () => {
         /**
          * tokenResponse.id_token is what backend needs
          */
+
+        console.log("tokenResponse", tokenResponse);
         const res = await axiosInstance.get(
-          "/auth/google/auth",
-          {
-            id_token: tokenResponse.id_token,
-          },
+          `/auth/google/auth?code=${tokenResponse?.access_token}`,
+
           {
             withCredentials: true, // IMPORTANT if backend sets cookies
           }

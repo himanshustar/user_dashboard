@@ -47,9 +47,13 @@ const LoginForm = ({
     try {
       if (activeTab === "phone") {
         setPhoneNumber(values.phone);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        console.log("Phone login:", values);
-        setCurrentScreen("otp");
+        const response = await axiosInstance.post("/auth/send-otp/", values);
+        console.log("response:", response);
+        if (response.status === 200) {
+          console.log("Phone login:", values);
+          toast.success(response?.data?.message);
+          setCurrentScreen("otp");
+        }
       } else {
         const response = await axiosInstance.post("/auth/login/", values);
         console.log("Login success:", response?.data?.message);
@@ -66,27 +70,47 @@ const LoginForm = ({
     }
   };
 
-  const handleVerifyOTP = () => {
+  const handleVerifyOTP = async () => {
+    // 🔴 Validation
     if (otp.length !== 4) {
-      setOtpError("Please enter complete 4-digit OTP");
+      setOtpError("Please enter a complete 4-digit OTP");
+      toast.error("Invalid OTP");
       return;
     }
 
+    // 🔴 Prevent multiple clicks
     if (verifyingOTP || resendingOTP) return;
 
     setVerifyingOTP(true);
     setOtpError("");
 
-    setTimeout(() => {
-      if (otp === "1234") {
-        setCurrentScreen("dashboard");
-        setOtp("");
-        setOtpError("");
+    try {
+      const response = await axiosInstance.post("/auth/verify-otp/", {
+        otp,
+        phone: phoneNumber,
+      });
+
+      if (response?.status === 200) {
+        toast.success("OTP verified successfully ✅");
+        login(); // No user object needed
+
+        navigate("/bookings");
       } else {
-        setOtpError("Invalid OTP. Please try again.");
+        toast.error("OTP verification failed");
       }
+    } catch (error: any) {
+      console.error("Verify OTP error:", error);
+
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Something went wrong. Please try again.";
+
+      setOtpError(message);
+      toast.error(message);
+    } finally {
       setVerifyingOTP(false);
-    }, 1200);
+    }
   };
 
   const handleResendOTP = () => {
@@ -220,7 +244,7 @@ const LoginForm = ({
                   >
                     <button
                       disabled={formikProps.isSubmitting}
-                      className="px-8 h-11 bg-[#E8F1FA] text-xs text-[#004B87] font-semibold flex items-center justify-center gap-2.5 shadow-lg hover:bg-white transition-colors mr-4"
+                      className="px-8 h-11 cursor-pointer bg-[#E8F1FA] text-xs text-[#004B87] font-semibold flex items-center justify-center gap-2.5 shadow-lg hover:bg-white transition-colors mr-4"
                       style={{ borderRadius: "2rem 0 4rem 2rem" }}
                     >
                       {formikProps.isSubmitting ? (
@@ -236,11 +260,14 @@ const LoginForm = ({
                       )}
                     </button>
 
-                    <button className="w-11 h-11 rounded-[15px] rounded-bl-none bg-[#020211] flex items-center justify-center">
+                    <button
+                      onClick={() => googleLogin()}
+                      className="w-11 h-11 cursor-pointer rounded-[15px] rounded-bl-none bg-[#020211] flex items-center justify-center"
+                    >
                       <GoogleIcon />
                     </button>
 
-                    <button className="w-11 h-11 rounded-[15px] rounded-bl-none bg-[#020211] flex items-center justify-center">
+                    <button className="w-11 h-11 cursor-pointer rounded-[15px] rounded-bl-none bg-[#020211] flex items-center justify-center">
                       <TruecallerIcon />
                     </button>
                   </div>
@@ -311,7 +338,7 @@ const LoginForm = ({
                     <button
                       type="submit"
                       disabled={formikProps.isSubmitting}
-                      className="px-8 h-11 bg-[#E8F1FA] text-xs text-[#004B87] font-semibold flex items-center justify-center gap-2.5 shadow-lg hover:bg-white transition-colors mr-4"
+                      className="px-8 h-11 cursor-pointer bg-[#E8F1FA] text-xs text-[#004B87] font-semibold flex items-center justify-center gap-2.5 shadow-lg hover:bg-white transition-colors mr-4"
                       style={{ borderRadius: "2rem 0 4rem 2rem" }}
                     >
                       {formikProps.isSubmitting ? (
@@ -327,7 +354,10 @@ const LoginForm = ({
                       )}
                     </button>
 
-                    <button className="w-11 h-11 rounded-[15px] rounded-bl-none bg-[#020211] flex items-center justify-center">
+                    <button
+                      onClick={() => googleLogin()}
+                      className="w-11 h-11 cursor-pointer rounded-[15px] rounded-bl-none bg-[#020211] flex items-center justify-center"
+                    >
                       <GoogleIcon />
                     </button>
 
@@ -356,7 +386,7 @@ const LoginForm = ({
               buttonText={
                 <div className="flex items-center justify-center gap-3">
                   <GoogleIcon />
-                  Continue with Google 123
+                  Continue with Google
                 </div>
               }
             />
