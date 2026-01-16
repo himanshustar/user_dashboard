@@ -8,6 +8,7 @@ const MyInput = ({
   isRequired = false,
   disabled = false,
   formikProps,
+  type = "text",
   ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -21,9 +22,7 @@ const MyInput = ({
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-sm text-gray-400 mb-2">
-          {label} {isRequired && <span className="text-red-500">*</span>}
-        </label>
+        <label className="block text-sm text-[#E3EDFF] mb-2">{label}</label>
       )}
 
       <div className="relative">
@@ -33,7 +32,7 @@ const MyInput = ({
           onChange={handleChange}
           onBlur={handleBlur}
           disabled={disabled}
-          type={name === "password" && !showPassword ? "password" : "text"}
+          type={type === "password" && !showPassword ? "password" : "text"}
           className={` w-full px-4 py-3 ${
             name === "password" ? "pr-12" : "pr-4"
           } font-normal bg-gray-900/40 border-[0.8px] rounded-xl text-[#E3EDFF] placeholder-gray-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 h-10.5 ${

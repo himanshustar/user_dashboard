@@ -1,29 +1,31 @@
 import LoginForm from "../components/LoginForm";
+import NewLoginForm from "../components/NewLoginForm";
 import LightRays from "../components/ui/LightRays";
+import LoginFormWrapper from "../components/ui/LoginFormWrapper";
 import "../styles/ketsiyo.css";
 
 const LoginPage = () => {
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center md:px-20 px-0">
+    <div className="min-h-svh bg-gray-900 flex items-start md:items-center  justify-center md:px-20 px-0">
+      <div className="absolute inset-0 top-[12%]  rounded-3xl md:hidden block">
+        <LightRays
+          raysOrigin="top-right"
+          rayAngle={150}
+          raysColor="#56ADFF"
+          raysSpeed={0.35}
+          lightSpread={2.15}
+          rayLength={4.25}
+          fadeDistance={9.2}
+          saturation={1}
+          pulsating={false}
+          followMouse={true}
+          mouseInfluence={0.02}
+          noiseAmount={0.08}
+          distortion={0.04}
+        />
+      </div>
       {/* MAIN FLEX CONTAINER */}
-      <div className="flex flex-col md:flex-row w-full items-center justify-center relative">
-        <div className="absolute inset-0 top-[12%]  min-h-screen rounded-3xl md:hidden block">
-          <LightRays
-            raysOrigin="top-right"
-            rayAngle={150}
-            raysColor="#56ADFF"
-            raysSpeed={0.35}
-            lightSpread={2.15}
-            rayLength={4.25}
-            fadeDistance={3.2}
-            saturation={1}
-            pulsating={false}
-            followMouse={true}
-            mouseInfluence={0.02}
-            noiseAmount={0.08}
-            distortion={0.04}
-          />
-        </div>
+      <div className="flex flex-col  md:flex-row w-full items-center justify-center relative">
         {/* TOP (MOBILE) / LEFT (DESKTOP): VIDEO */}
         <div className="relative w-full md:flex-1 flex justify-center md:mt-20 mt-0 z-10">
           <div
@@ -64,8 +66,10 @@ const LoginPage = () => {
         </div>
 
         {/* BOTTOM (MOBILE) / RIGHT (DESKTOP): FORM */}
-        <div className="w-full md:flex-1 flex justify-center -mt-8 md:mt-0">
-          <LoginForm />
+        <div className="w-full md:flex-1 flex  -mt-8 md:mt-0 z-10">
+          <LoginFormWrapper />
+          {/* <LoginForm /> */}
+          {/* <NewLoginForm /> */}
         </div>
       </div>
     </div>
