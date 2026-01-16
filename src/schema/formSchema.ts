@@ -34,3 +34,19 @@ export const editProfileSchema = Yup.object({
   alt_email: Yup.string().email("Invalid email address").nullable(),
   companyName: Yup.string().nullable(),
 });
+
+export const changePasswordSchema = Yup.object().shape({
+  old_password: Yup.string()
+    .min(4, "Password must be at least 4 characters")
+    .required("Old password is required"),
+  new_password: Yup.string()
+    .min(4, "Password must be at least 4 characters")
+    .required("New password is required")
+    .notOneOf(
+      [Yup.ref("old_password")],
+      "New password must be different from old password"
+    ),
+  confirm_password: Yup.string()
+    .oneOf([Yup.ref("new_password")], "Passwords must match")
+    .required("Please confirm your password"),
+});

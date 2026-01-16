@@ -34,7 +34,7 @@ const MyInput = ({
           disabled={disabled}
           type={type === "password" && !showPassword ? "password" : "text"}
           className={` w-full px-4 py-3 ${
-            name === "password" ? "pr-12" : "pr-4"
+            type === "password" ? "pr-12" : "pr-4"
           } font-normal bg-gray-900/40 border-[0.8px] rounded-xl text-[#E3EDFF] placeholder-gray-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 h-10.5 ${
             hasError
               ? "border-red-500 focus:border-red-500"
@@ -43,11 +43,11 @@ const MyInput = ({
           {...props}
         />
 
-        {name === "password" && (
+        {type === "password" && (
           <button
             type="button"
             onClick={handleTogglePassword}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-400 hover:text-blue-300 focus:outline-none transition-colors"
+            className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 text-blue-400 hover:text-blue-300 focus:outline-none transition-colors"
           >
             {showPassword ? (
               <EyeOff className="w-5 h-5" />

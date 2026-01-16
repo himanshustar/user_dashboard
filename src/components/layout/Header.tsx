@@ -36,7 +36,10 @@ const Header = ({ onMenuClick, sidebarOpen }) => {
 
         {/* Right: Profile */}
         <div className="flex items-center gap-2">
-          <button className="cursor-pointer relative p-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors">
+          <button
+            onClick={() => navigate("/notifications")}
+            className="cursor-pointer relative p-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
+          >
             <Bell size={20} />
             <span className="absolute top-1 right-1 w-2 h-2 bg-pink-500 rounded-full"></span>
           </button>

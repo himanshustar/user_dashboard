@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Calendar, MapPin, IndianRupee, User, Loader2, X } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
+import axiosInstance from "../../api/axios";
 
 const DashboardContent = () => {
   const [dealsData, setDealsData] = useState(null);
@@ -109,26 +110,61 @@ const DashboardContent = () => {
       onClick={() => setSelectedDeal(deal)}
       className="bg-slate-800 rounded-lg p-5 border border-slate-700 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/20 transition-all cursor-pointer"
     >
-      <div className="flex justify-between items-start mb-3">
-        <h3 className="text-lg font-semibold text-white line-clamp-2 flex-1">
+      <div className="flex justify-between items-start mb-4">
+        <h3 className="text-lg font-semibold text-white line-clamp-2 flex-1 pr-2">
           {deal.title}
         </h3>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(deal.status)}`}>
+        <span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getStatusColor(deal.status)}`}>
           {capitalizeWords(deal.status)}
         </span>
+      </div>
+
+      <div className="space-y-3 mb-4">
+        {deal.artist && (
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+              <span className="text-sm">🎭</span>
+            </div>
+            <span className="text-sm text-slate-300 truncate">{deal.artist}</span>
+          </div>
+        )}
+
+        {deal.person_name && (
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+              <User size={14} className="text-white" />
+            </div>
+            <span className="text-sm text-slate-300 truncate">{deal.person_name}</span>
+          </div>
+        )}
+
+        {deal.event_date && (
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center flex-shrink-0">
+              <Calendar size={14} className="text-white" />
+            </div>
+            <span className="text-sm text-slate-300">{formatDate(deal.event_date)}</span>
+          </div>
+        )}
+
+        {deal.location && (
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
+              <MapPin size={14} className="text-white" />
+            </div>
+            <span className="text-sm text-slate-300 truncate">{deal.location}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="pt-3 border-t border-slate-700 flex justify-between items-center">
+        <div className="text-xs text-slate-400">
+          ID: <span className="text-slate-300">{deal.deal_id}</span>
+        </div>
         <div className="text-lg font-bold text-blue-400">
           {deal.formatted_value}
         </div>
       </div>
-
-      {deal.event_date && (
-        <div className="mt-3 text-sm text-slate-300">
-          {formatDate(deal.event_date)}
-        </div>
-      )}
     </div>
   );
 
@@ -136,7 +172,7 @@ const DashboardContent = () => {
     if (!deal) return null;
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-xs bg-opacity-70 flex items-center justify-center z-50 p-4" onClick={onClose}>
         <div className="bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-700" onClick={(e) => e.stopPropagation()}>
           <div className="sticky top-0 bg-slate-800 border-b border-slate-700 px-6 py-4 flex items-center justify-between rounded-t-2xl">
             <h2 className="text-2xl font-bold text-white">Deal Details</h2>
@@ -283,7 +319,7 @@ const DashboardContent = () => {
     : currentMainData?.[currentSubTab] || [];
 
   return (
-    <div className="p-6 space-y-6 max-w-[1600px] mx-auto min-h-screen">
+    <div className="p-1 md:p-6 space-y-6 max-w-[1600px] mx-auto min-h-screen">
       <div className="bg-slate-800/60 backdrop-blur-sm rounded-2xl p-2 border border-slate-700/70 shadow-xl">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {mainTabs.map((tab) => {
@@ -292,7 +328,7 @@ const DashboardContent = () => {
               <button
                 key={tab}
                 onClick={() => handleMainTabChange(tab)}
-                className={`px-6 py-4 rounded-xl font-semibold cursor-pointer transition-all duration-300 ${
+                className={`px-6 py-4 rounded-xl font-semibold transition-all duration-300 cursor-pointer ${
                   activeMainTab === tab
                     ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
                     : "text-slate-300 hover:bg-slate-700/50"
@@ -322,7 +358,7 @@ const DashboardContent = () => {
                 <button
                   key={subTab}
                   onClick={() => handleSubTabChange(subTab)}
-                  className={`px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
+                  className={`px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer ${
                     currentSubTab === subTab
                       ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
                       : "text-slate-300 hover:bg-slate-700/50"

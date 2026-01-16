@@ -7,6 +7,8 @@ import PrivateRoute from "./components/PrivateRoute";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import EditProfile from "./pages/EditProfile";
 import { Toaster } from "react-hot-toast";
+import NotificationPage from "./pages/NotificationPage";
+import ChangePasswordPage from "./pages/ChangePasswordPage";
 
 export default function App() {
   return (
@@ -22,10 +24,10 @@ export default function App() {
               <Route path="/" element={<Navigate to="/bookings" replace />} />
               <Route path="/bookings" element={<Dashboard />} />
               <Route path="/edit-profile" element={<EditProfile />} />
+              <Route path="/notifications" element={<NotificationPage />} />
+              <Route path="/change-password" element={<ChangePasswordPage />} />
               {/* <Route path="/home" element={<Dashboard />} />
-              <Route path="/notifications" element={<Dashboard />} />
               <Route path="/queries" element={<Dashboard />} />
-              <Route path="/change-password" element={<Dashboard />} />
               <Route path="/discover" element={<Dashboard />} /> */}
             </Route>
           </Route>

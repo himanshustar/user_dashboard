@@ -17,6 +17,7 @@ import axiosInstance from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import toast from "react-hot-toast";
+import { useGoogleLoginHandler } from "../hooks/useGoogleLoginHandler";
 
 const LoginForm = ({
   currentScreen,
@@ -35,6 +36,7 @@ const LoginForm = ({
   const [activeTab, setActiveTab] = useState("email");
   const navigate = useNavigate();
   const { login } = useAuth();
+  const googleLogin = useGoogleLoginHandler();
 
   const handleOtpChange = (newOtp) => {
     setOtp(newOtp);
@@ -100,7 +102,6 @@ const LoginForm = ({
       setResendingOTP(false);
     }, 1000);
   };
-  
 
   return (
     <>
@@ -351,10 +352,11 @@ const LoginForm = ({
           <div className="hidden md:flex flex-col gap-0 ">
             <MyButton
               variant="secondary"
+              onClick={() => googleLogin()}
               buttonText={
                 <div className="flex items-center justify-center gap-3">
                   <GoogleIcon />
-                  Continue with Google
+                  Continue with Google 123
                 </div>
               }
             />
