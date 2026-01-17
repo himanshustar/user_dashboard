@@ -9,8 +9,8 @@ import EditProfile from "./pages/EditProfile";
 import { Toaster } from "react-hot-toast";
 import NotificationPage from "./pages/NotificationPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
-import NotificationDetailsPage from "./pages/NotificationDetailsPage";
 import BookingFlowPage from "./pages/BookingFlowPage";
+import "../src/App.css";
 
 export default function App() {
   return (

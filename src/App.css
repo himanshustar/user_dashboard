@@ -1,4 +1,12 @@
-* {
-  padding: 0;
-  margin: 0;
+@keyframes screenChange {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-screenChange {
+  animation: screenChange 650ms ease-in-out forwards;
 }

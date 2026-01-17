@@ -272,7 +272,7 @@ const NewLoginForm = ({
                   <FormikSubmitButton
                     isLoading={formikProps.isSubmitting}
                     loadingText="Logging in..."
-                    buttonText="Log In"
+                    buttonText="Login"
                     className="hidden md:block"
                   />
 

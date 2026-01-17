@@ -40,14 +40,16 @@ export const GoogleIcon = () => (
   </svg>
 );
 
-export const TruecallerIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 48 48">
-    <circle cx="24" cy="24" r="24" fill="#1A73E8" />
-    <path
-      fill="#fff"
-      d="M33.6 30.4l-4.4-1.9c-.6-.3-1.3-.1-1.7.4l-2 2.4c-3.3-1.7-6-4.4-7.7-7.7l2.4-2c.5-.4.6-1.1.4-1.7l-1.9-4.4c-.3-.7-1.1-1.1-1.8-.9l-3.8.9c-.7.2-1.2.8-1.2 1.5 0 10.5 8.5 19 19 19 .7 0 1.3-.5 1.5-1.2l.9-3.8c.2-.7-.2-1.5-.9-1.8z"
+export const TruecallerIcon = ({ bgColor = "#111827" }) => (
+  <div
+    className={`w-10 h-10 flex items-center justify-center rounded-lg bg-[${bgColor}] `}
+  >
+    <img
+      src="/images/truecallerIcon.svg"
+      alt="truecaller"
+      className="w-5 h-5 rounded-full scale-110"
     />
-  </svg>
+  </div>
 );
 
 export const EventDetails = ({ deal }) => {
