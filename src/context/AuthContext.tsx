@@ -10,12 +10,13 @@ interface User {
   first_name?: string;
   last_name?: string;
   company_name?: string;
-  phone_verified?: string;
-  email_verified?: string;
+  phone_verified?: 0 | 1 | boolean;
+  email_verified?: 0 | 1 | boolean;
   alt_email?: string;
   alt_phone?: string;
   alt_phone_code?: string;
   // Add other user properties
+  [key: string]: any;
 }
 
 interface AuthContextType {

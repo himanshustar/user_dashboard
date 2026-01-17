@@ -33,7 +33,7 @@ const ChangePasswordPage = () => {
     } catch (error) {
       console.error("Password change failed:", error);
       toast.error(
-        error?.response?.data?.message ||
+        error?.message ||
           "Failed to change password. Please try again."
       );
     } finally {
@@ -103,7 +103,7 @@ const ChangePasswordPage = () => {
                 <ul className="space-y-1.5">
                   <li className="text-sm text-gray-400 flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
-                    At least 8 characters
+                    At least 4 characters
                   </li>
                 </ul>
               </div>

@@ -9,6 +9,8 @@ import EditProfile from "./pages/EditProfile";
 import { Toaster } from "react-hot-toast";
 import NotificationPage from "./pages/NotificationPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
+import NotificationDetailsPage from "./pages/NotificationDetailsPage";
+import BookingFlowPage from "./pages/BookingFlowPage";
 
 export default function App() {
   return (
@@ -26,6 +28,10 @@ export default function App() {
               <Route path="/edit-profile" element={<EditProfile />} />
               <Route path="/notifications" element={<NotificationPage />} />
               <Route path="/change-password" element={<ChangePasswordPage />} />
+              <Route
+                path="/query/initialize/:dealId"
+                element={<BookingFlowPage />}
+              />
               {/* <Route path="/home" element={<Dashboard />} />
               <Route path="/queries" element={<Dashboard />} />
               <Route path="/discover" element={<Dashboard />} /> */}

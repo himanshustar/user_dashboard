@@ -1,14 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import MyInput from "../components/ui/MyInput";
 import { Formik, Form } from "formik";
 import { loginSchema, phoneSchema } from "../schema/formSchema";
-import {
-  Smartphone,
-  Mail,
-  SendHorizontal,
-  ArrowLeft,
-  Loader2,
-} from "lucide-react";
+import { Smartphone, Mail, SendHorizontal, Loader2 } from "lucide-react";
 import FormikSubmitButton from "./ui/FormikSubmitButton";
 import MyButton from "./ui/MyButton";
 import OTPInput from "./ui/OTPInput";
@@ -45,28 +39,26 @@ const LoginForm = ({
 
   const handleLoginSubmit = async (values) => {
     try {
-      if (activeTab === "phone") {
-        setPhoneNumber(values.phone);
-        const response = await axiosInstance.post("/auth/send-otp/", values);
-        console.log("response:", response);
-        if (response.status === 200) {
-          console.log("Phone login:", values);
-          toast.success(response?.data?.message);
-          setCurrentScreen("otp");
-        }
-      } else {
-        const response = await axiosInstance.post("/auth/login/", values);
-        console.log("Login success:", response?.data?.message);
-        toast.success(response?.data?.message);
+      const res = await axiosInstance.post("/auth/login/", values);
 
-        // 🔴 Just mark as authenticated (cookie is set by backend)
-        login(); // No user object needed
+      toast.success(res.message);
+      login();
+      navigate("/bookings");
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast.error(error.message);
+    }
+  };
 
-        navigate("/bookings");
-      }
-    } catch (error) {
-      console.error("Login error:", error?.response?.data?.error);
-      toast.error(error?.response?.data?.error);
+  const handleSendOtp = async (values) => {
+    setPhoneNumber(values.phone);
+    try {
+      const res = await axiosInstance.post("/auth/send-otp/", values);
+
+      toast.success(res.message);
+      setCurrentScreen("otp");
+    } catch (error: any) {
+      toast.error(error.message);
     }
   };
 
@@ -91,7 +83,7 @@ const LoginForm = ({
       });
 
       if (response?.status === 200) {
-        toast.success("OTP verified successfully ✅");
+        toast.success(response?.message || "OTP verified successfully ✅");
         login(); // No user object needed
 
         navigate("/bookings");
@@ -100,14 +92,8 @@ const LoginForm = ({
       }
     } catch (error: any) {
       console.error("Verify OTP error:", error);
-
-      const message =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        "Something went wrong. Please try again.";
-
-      setOtpError(message);
-      toast.error(message);
+      setOtpError(error.message);
+      toast.error(error.message);
     } finally {
       setVerifyingOTP(false);
     }
@@ -189,59 +175,52 @@ const LoginForm = ({
           {/* Phone Form */}
           {activeTab === "phone" && (
             <Formik
-              initialValues={{ phone: "" }}
+              initialValues={{ phone: "", password: "" }}
               validationSchema={phoneSchema}
               onSubmit={handleLoginSubmit}
             >
               {(formikProps) => (
                 <Form className="space-y-4">
+                  <MyInput
+                    formikProps={formikProps}
+                    name="phone"
+                    label="Phone Number"
+                    isRequired={true}
+                    placeholder="Enter 10-digit number"
+                    customType="phone"
+                  />
+
                   <div>
-                    <label className="block text-sm text-gray-300 mb-1.5">
-                      Phone Number
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 font-medium">
-                        +91
-                      </span>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formikProps.values.phone}
-                        onChange={formikProps.handleChange}
-                        onBlur={formikProps.handleBlur}
-                        placeholder="Enter 10-digit number"
-                        className={`w-full px-4 py-2.5 pl-14 bg-gray-900/40 rounded-lg text-white placeholder-gray-500 border transition-all duration-200 focus:outline-none ${
-                          formikProps.errors.phone && formikProps.touched.phone
-                            ? "border-red-500 focus:border-red-500"
-                            : "border-gray-700 focus:border-blue-500"
-                        }`}
-                      />
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-sm text-[#E3EDFF]">
+                        Password <span className="text-red-400">*</span>
+                      </label>
+                      <button
+                        type="button"
+                        className="text-sm text-[#E3EDFF] hover:underline cursor-pointer"
+                        onClick={() => setCurrentScreen("sendOtp")}
+                      >
+                        Login with OTP?
+                      </button>
                     </div>
-                    {formikProps.errors.phone && formikProps.touched.phone && (
-                      <p className="mt-1.5 text-sm text-red-500">
-                        {formikProps.errors.phone}
-                      </p>
-                    )}
+                    <MyInput
+                      formikProps={formikProps}
+                      name="password"
+                      label=""
+                      isRequired={true}
+                      placeholder="Enter your password"
+                      type="password"
+                    />
                   </div>
 
                   <FormikSubmitButton
                     isLoading={formikProps.isSubmitting}
-                    loadingText="Sending OTP..."
-                    buttonText="Send OTP"
+                    loadingText="Logging in..."
+                    buttonText="Log In"
                     className="hidden md:block"
                   />
                   {/* MOBILE BOTTOM ACTION BAR */}
-                  <div
-                    className="
-    fixed bottom-0 left-0 right-0
-    md:hidden
-    bg-gradient-to-t from-[#01508A] to-[#66A3FF]
-    px-4 py-4 pl-8
-    flex items-center gap-3 justify-center
-    rounded-tl-[80px]
-    z-50
-  "
-                  >
+                  <div className="fixed bottom-0 left-0 right-0 md:hidden bg-gradient-to-t from-[#01508A] to-[#66A3FF] px-4 py-4 pl-8 flex items-center gap-3 justify-center rounded-tl-[80px] z-50">
                     <button
                       disabled={formikProps.isSubmitting}
                       className="px-8 h-11 cursor-pointer bg-[#E8F1FA] text-xs text-[#004B87] font-semibold flex items-center justify-center gap-2.5 shadow-lg hover:bg-white transition-colors mr-4"
@@ -297,7 +276,7 @@ const LoginForm = ({
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label className="block text-sm text-[#E3EDFF]">
-                        Password
+                        Password <span className="text-red-400">*</span>
                       </label>
                       <button
                         type="button"
@@ -310,7 +289,7 @@ const LoginForm = ({
                       formikProps={formikProps}
                       name="password"
                       label=""
-                      isRequired={false}
+                      isRequired={true}
                       placeholder="Enter your password"
                       type="password"
                     />
@@ -324,17 +303,7 @@ const LoginForm = ({
                   />
 
                   {/* MOBILE BOTTOM ACTION BAR */}
-                  <div
-                    className="
-    fixed bottom-0 left-0 right-0
-    md:hidden
-    bg-gradient-to-t from-[#01508A] to-[#66A3FF]
-    px-4 py-4 pl-8
-    flex items-center gap-3 justify-center
-    rounded-tl-[80px]
-    z-50
-  "
-                  >
+                  <div className="fixed bottom-0 left-0 right-0 md:hidden bg-gradient-to-t from-[#01508A] to-[#66A3FF] px-4 py-4 pl-8 flex items-center gap-3 justify-center rounded-tl-[80px] z-50">
                     <button
                       type="submit"
                       disabled={formikProps.isSubmitting}
@@ -369,6 +338,98 @@ const LoginForm = ({
               )}
             </Formik>
           )}
+
+          <div className="relative my-6 hidden md:block">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-700"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-3 bg-gray-800/30 text-gray-400">OR</span>
+            </div>
+          </div>
+
+          <div className="hidden md:flex flex-col gap-0 ">
+            <MyButton
+              variant="secondary"
+              onClick={() => googleLogin()}
+              buttonText={
+                <div className="flex items-center justify-center gap-3">
+                  <GoogleIcon />
+                  Continue with Google
+                </div>
+              }
+            />
+            <MyButton
+              variant="secondary"
+              buttonText={
+                <div className="flex items-center justify-center gap-3">
+                  <TruecallerIcon />
+                  Continue with Truecaller
+                </div>
+              }
+            />
+          </div>
+        </>
+      )}
+
+      {currentScreen === "sendOtp" && (
+        <>
+          <Formik
+            initialValues={{ phone: "" }}
+            validationSchema={phoneSchema}
+            onSubmit={handleSendOtp}
+          >
+            {(formikProps) => (
+              <Form className="space-y-4">
+                <MyInput
+                  formikProps={formikProps}
+                  name="phone"
+                  label="Phone Number"
+                  isRequired={true}
+                  placeholder="Enter 10-digit number"
+                  customType="phone"
+                />
+
+                <FormikSubmitButton
+                  isLoading={formikProps.isSubmitting}
+                  loadingText="Sending OTP..."
+                  buttonText="Send OTP"
+                  className="hidden md:block"
+                />
+                {/* MOBILE BOTTOM ACTION BAR */}
+                <div className="fixed bottom-0 left-0 right-0 md:hidden bg-gradient-to-t from-[#01508A] to-[#66A3FF] px-4 py-4 pl-8 flex items-center gap-3 justify-center rounded-tl-[80px] z-50">
+                  <button
+                    disabled={formikProps.isSubmitting}
+                    className="px-8 h-11 cursor-pointer bg-[#E8F1FA] text-xs text-[#004B87] font-semibold flex items-center justify-center gap-2.5 shadow-lg hover:bg-white transition-colors mr-4"
+                    style={{ borderRadius: "2rem 0 4rem 2rem" }}
+                  >
+                    {formikProps.isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Sending OTP...
+                      </>
+                    ) : (
+                      <>
+                        <SendHorizontal className="w-4 h-4" />
+                        Send OTP
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => googleLogin()}
+                    className="w-11 h-11 cursor-pointer rounded-[15px] rounded-bl-none bg-[#020211] flex items-center justify-center"
+                  >
+                    <GoogleIcon />
+                  </button>
+
+                  <button className="w-11 h-11 cursor-pointer rounded-[15px] rounded-bl-none bg-[#020211] flex items-center justify-center">
+                    <TruecallerIcon />
+                  </button>
+                </div>
+              </Form>
+            )}
+          </Formik>
 
           <div className="relative my-6 hidden md:block">
             <div className="absolute inset-0 flex items-center">

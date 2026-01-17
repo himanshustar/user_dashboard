@@ -26,17 +26,30 @@ axiosInstance.interceptors.request.use(
    Response Interceptor
 ====================== */
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // 🔹 unwrap API response
+    return {
+      ...response,
+      data: response.data?.data ?? response.data,
+      message: response.data?.message,
+    };
+  },
   (error) => {
-    if (error.response?.status === 401) {
-      console.error("Unauthorized – session expired");
+    const normalizedError = {
+      status: error.response?.status,
+      message:
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Something went wrong. Please try again.",
+      raw: error,
+    };
 
-      // Optional: global logout / redirect
-      // localStorage.clear();
-      // window.location.href = "/login";
+    // Optional global handling
+    if (normalizedError.status === 401) {
+      console.error("Unauthorized - session expired");
     }
 
-    return Promise.reject(error);
+    return Promise.reject(normalizedError);
   }
 );
 

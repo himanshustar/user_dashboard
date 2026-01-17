@@ -9,29 +9,22 @@ export const useGoogleLoginHandler = () => {
   const navigate = useNavigate();
 
   const googleLogin = useGoogleLogin({
-    flow: "implicit", // best for SPA
+    // flow: "auth-code", // best for SPA
+    flow: "auth-code",
     onSuccess: async (tokenResponse) => {
       try {
-        /**
-         * tokenResponse.id_token is what backend needs
-         */
-
         console.log("tokenResponse", tokenResponse);
         const res = await axiosInstance.get(
-          `/auth/google/auth?code=${tokenResponse?.access_token}`,
-
-          {
-            withCredentials: true, // IMPORTANT if backend sets cookies
-          }
+          `auth/google/auth?code=${tokenResponse?.code}`
         );
 
-        toast.success(res.data.message || "Logged in with Google");
+        toast.success(res?.message || "Logged in with Google");
 
         login(); // mark authenticated
         navigate("/bookings");
       } catch (err: any) {
         console.error(err);
-        toast.error(err?.response?.data?.error || "Google login failed");
+        toast.error(err?.message || "Google login failed");
       }
     },
     onError: () => {

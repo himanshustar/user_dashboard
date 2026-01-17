@@ -10,12 +10,14 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
+import useIsMobile from "../../hooks/useMediaQuery";
 
 const Sidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const isMobile = useIsMobile();
 
   const menuItems = [
     { icon: Home, label: "Home", path: "/bookings?tab=my_queries" },
@@ -29,19 +31,25 @@ const Sidebar = ({ isOpen, onClose }) => {
     },
     { icon: Edit, label: "Edit Profile", path: "/edit-profile" },
     { icon: Lock, label: "Change Password", path: "/change-password" },
-    { icon: Compass, label: "Discover Artists", path: "https://starclinch.com/browse" },
+    {
+      icon: Compass,
+      label: "Discover Artists",
+      path: "https://starclinch.com/browse",
+    },
     { icon: LogOut, label: "Logout", path: "/logout" },
   ];
 
   const handleNavigation = (path) => {
-    console.log("path:", path);
-
     if (path === "/logout") {
       console.log("Logging out");
       logout();
+    } else if (path.startsWith("https")) {
+      window.open(path, "_blank", "noopener,noreferrer");
     } else {
       navigate(path);
-      onClose();
+      if (isMobile) {
+        onClose();
+      }
     }
   };
 
@@ -104,9 +112,11 @@ const Sidebar = ({ isOpen, onClose }) => {
 
         {/* Post Requirement Button */}
         <div className="p-4 border-t border-slate-700/50 bg-slate-900/95 backdrop-blur-sm mt-auto">
-          <button onClick={() => navigate("https://starclinch.com/book/category")} className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 rounded-full transition-all duration-300 shadow-lg hover:shadow-pink-500/50 hover:scale-105 whitespace-nowrap cursor-pointer">
-            Post Your Requirement
-          </button>
+          <Link to="https://starclinch.com/book/category" target="_blank">
+            <button className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 rounded-full transition-all duration-300 shadow-lg hover:shadow-pink-500/50 hover:scale-105 whitespace-nowrap cursor-pointer">
+              Post Your Requirement
+            </button>
+          </Link>
         </div>
       </aside>
     </>

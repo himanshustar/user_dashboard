@@ -1,7 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { Calendar, MapPin, IndianRupee, User, Loader2, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Calendar, MapPin, User, Loader2, X } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import axiosInstance from "../../api/axios";
+import {
+  capitalizeWords,
+  formatDate,
+  getStatusColor,
+} from "../../utils/helper";
+import DealCard from "../ui/DealCard";
+import { LoaderUi } from "../../utils/HelperStructure";
 
 const DashboardContent = () => {
   const [dealsData, setDealsData] = useState(null);
@@ -30,7 +37,7 @@ const DashboardContent = () => {
     const fetchDeals = async () => {
       try {
         const res = await axiosInstance.get(
-          "https://buyer-dash.starclinch.com/deals/fetch-deals/"
+          "https://buyer-dash.starclinch.com/deals/fetch-deals/",
         );
 
         if (res?.data?.success) {
@@ -75,105 +82,18 @@ const DashboardContent = () => {
     });
   };
 
-  const capitalizeWords = (str) => {
-    return str
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "Not specified";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "open":
-        return "bg-green-500/20 text-green-400 border border-green-500/30";
-      case "closed":
-        return "bg-blue-500/20 text-blue-400 border border-blue-500/30";
-      case "lost":
-        return "bg-red-500/20 text-red-400 border border-red-500/30";
-      default:
-        return "bg-slate-500/20 text-slate-400 border border-slate-500/30";
-    }
-  };
-
-  const DealCard = ({ deal }) => (
-    <div
-      onClick={() => setSelectedDeal(deal)}
-      className="bg-slate-800 rounded-lg p-5 border border-slate-700 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/20 transition-all cursor-pointer"
-    >
-      <div className="flex justify-between items-start mb-4">
-        <h3 className="text-lg font-semibold text-white line-clamp-2 flex-1 pr-2">
-          {deal.title}
-        </h3>
-        <span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getStatusColor(deal.status)}`}>
-          {capitalizeWords(deal.status)}
-        </span>
-      </div>
-
-      <div className="space-y-3 mb-4">
-        {deal.artist && (
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-              <span className="text-sm">🎭</span>
-            </div>
-            <span className="text-sm text-slate-300 truncate">{deal.artist}</span>
-          </div>
-        )}
-
-        {deal.person_name && (
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
-              <User size={14} className="text-white" />
-            </div>
-            <span className="text-sm text-slate-300 truncate">{deal.person_name}</span>
-          </div>
-        )}
-
-        {deal.event_date && (
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center flex-shrink-0">
-              <Calendar size={14} className="text-white" />
-            </div>
-            <span className="text-sm text-slate-300">{formatDate(deal.event_date)}</span>
-          </div>
-        )}
-
-        {deal.location && (
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
-              <MapPin size={14} className="text-white" />
-            </div>
-            <span className="text-sm text-slate-300 truncate">{deal.location}</span>
-          </div>
-        )}
-      </div>
-
-      <div className="pt-3 border-t border-slate-700 flex justify-between items-center">
-        <div className="text-xs text-slate-400">
-          ID: <span className="text-slate-300">{deal.deal_id}</span>
-        </div>
-        <div className="text-lg font-bold text-blue-400">
-          {deal.formatted_value}
-        </div>
-      </div>
-    </div>
-  );
-
   const DealModal = ({ deal, onClose }) => {
     if (!deal) return null;
 
     return (
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-xs bg-opacity-70 flex items-center justify-center z-50 p-4" onClick={onClose}>
-        <div className="bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-700" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="fixed inset-0 bg-black/70 backdrop-blur-xs bg-opacity-70 flex items-center justify-center z-50 p-4"
+        onClick={onClose}
+      >
+        <div
+          className="bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-700"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="sticky top-0 bg-slate-800 border-b border-slate-700 px-6 py-4 flex items-center justify-between rounded-t-2xl">
             <h2 className="text-2xl font-bold text-white">Deal Details</h2>
             <button
@@ -189,7 +109,11 @@ const DashboardContent = () => {
               <h3 className="text-xl font-semibold text-white mb-2">
                 {deal.title}
               </h3>
-              <span className={`inline-block px-4 py-1.5 rounded-full text-sm font-medium ${getStatusColor(deal.status)}`}>
+              <span
+                className={`inline-block px-4 py-1.5 rounded-full text-sm font-medium ${getStatusColor(
+                  deal.status,
+                )}`}
+              >
                 {capitalizeWords(deal.status)}
               </span>
             </div>
@@ -209,8 +133,12 @@ const DashboardContent = () => {
                       <User size={20} className="text-white" />
                     </div>
                     <div>
-                      <div className="text-xs text-slate-400">Contact Person</div>
-                      <div className="font-medium text-white">{deal.person_name}</div>
+                      <div className="text-xs text-slate-400">
+                        Contact Person
+                      </div>
+                      <div className="font-medium text-white">
+                        {deal.person_name}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -224,7 +152,9 @@ const DashboardContent = () => {
                     </div>
                     <div>
                       <div className="text-xs text-slate-400">Artist</div>
-                      <div className="font-medium text-white">{deal.artist}</div>
+                      <div className="font-medium text-white">
+                        {deal.artist}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -238,7 +168,9 @@ const DashboardContent = () => {
                     </div>
                     <div>
                       <div className="text-xs text-slate-400">Event Date</div>
-                      <div className="font-medium text-white">{formatDate(deal.event_date)}</div>
+                      <div className="font-medium text-white">
+                        {formatDate(deal.event_date)}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -252,7 +184,9 @@ const DashboardContent = () => {
                     </div>
                     <div>
                       <div className="text-xs text-slate-400">Location</div>
-                      <div className="font-medium text-white">{deal.location}</div>
+                      <div className="font-medium text-white">
+                        {deal.location}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -261,10 +195,16 @@ const DashboardContent = () => {
 
             <div className="border-t border-slate-700 pt-4 flex justify-between items-center text-sm text-slate-400">
               <div>
-                Deal ID: <span className="font-medium text-slate-300">{deal.deal_id}</span>
+                Deal ID:{" "}
+                <span className="font-medium text-slate-300">
+                  {deal.deal_id}
+                </span>
               </div>
               <div>
-                Last Updated: <span className="font-medium text-slate-300">{formatDate(deal.update_time)}</span>
+                Last Updated:{" "}
+                <span className="font-medium text-slate-300">
+                  {formatDate(deal.update_time)}
+                </span>
               </div>
             </div>
           </div>
@@ -294,11 +234,7 @@ const DashboardContent = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-      </div>
-    );
+    return <LoaderUi />;
   }
 
   if (!dealsData) {
@@ -348,8 +284,8 @@ const DashboardContent = () => {
               subTabs.length === 2
                 ? "grid-cols-2"
                 : subTabs.length === 3
-                ? "grid-cols-1 sm:grid-cols-3"
-                : "grid-cols-2 lg:grid-cols-4"
+                  ? "grid-cols-1 sm:grid-cols-3"
+                  : "grid-cols-2 lg:grid-cols-4"
             }`}
           >
             {subTabs.map((subTab) => {
@@ -382,7 +318,11 @@ const DashboardContent = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {currentData.map((deal) => (
-              <DealCard key={deal.deal_id} deal={deal} />
+              <DealCard
+                key={deal.deal_id}
+                deal={deal}
+                setSelectedDeal={setSelectedDeal}
+              />
             ))}
           </div>
         )}

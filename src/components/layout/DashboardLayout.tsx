@@ -16,21 +16,7 @@ const DashboardLayout = () => {
         const res = await axiosInstance.get(
           "https://buyer-dash.starclinch.com/auth/user/"
         );
-        console.log("res:", res);
-
-        login({
-          fullName: res?.data?.data?.first_name + res.data?.data?.last_name,
-          first_name: res?.data?.data?.first_name,
-          last_name: res.data?.data?.last_name,
-          email: res?.data?.data?.email,
-          phone: res?.data?.data?.phone,
-          company_name: res?.data?.data?.company_name,
-          phone_verified: res?.data?.data?.phone_verified,
-          email_verified: res?.data?.data?.email_verified,
-          alt_email: res?.data?.data?.alt_email,
-          alt_phone: res?.data?.data?.alt_phone,
-          alt_phone_code: res?.data?.data?.alt_phone_code,
-        });
+        login(res?.data);
       } catch (error: any) {
         console.error("User fetch failed", error);
 
@@ -44,7 +30,6 @@ const DashboardLayout = () => {
     if (!user) {
       fetchUser();
     }
-    // fetchUser();
   }, [user, login, logout, navigate]);
 
   const handleToggle = () => {

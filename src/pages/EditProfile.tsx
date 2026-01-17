@@ -1,56 +1,27 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Formik, Form } from "formik";
-import * as Yup from "yup";
 import { useAuth } from "../context/useAuth";
-import { Loader2, Check, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Check } from "lucide-react";
 import axiosInstance from "../api/axios";
 import MyInput from "../components/ui/MyInput";
 import { editProfileSchema } from "../schema/formSchema";
 import FormikSubmitButton from "../components/ui/FormikSubmitButton";
 import toast from "react-hot-toast";
+import VerifyOtpModal from "../components/ui/VerifyOtpModal";
 
 const EditProfile = () => {
   const { user, login } = useAuth();
-  console.log("user:", user);
   const [emailVerified, setEmailVerified] = useState(user?.email_verified);
   const [phoneVerified, setPhoneVerified] = useState(user?.phone_verified);
-
-  // Parse user data for initial values
-  const getInitialValues = () => {
-    return {
-      first_name: user?.first_name || "",
-      last_name: user?.last_name || "",
-      email: user?.email || "",
-      phone: user?.phone || "",
-      alt_phone: user?.alt_phone || "",
-      alt_email: user?.alt_email || "",
-      company_name: user?.company_name || "",
-      phone_verified: user?.phone_verified || 0,
-      email_verified: user?.email_verified || 0,
-      alt_phone_code: user?.alt_phone_code || "",
-    };
-  };
+  const [verifyModal, setVerifyModal] = useState<{
+    type: "email" | "phone";
+    value: string;
+  } | null>(null);
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const response = await axiosInstance.patch("/auth/user/update/", values);
-
-      if (response?.data?.success) {
-        // Update user context
-        login({
-          first_name: response?.data?.data?.first_name || "",
-          last_name: response?.data?.data?.last_name || "",
-          email: response?.data?.data?.email || "",
-          phone: response?.data?.data?.phone || "",
-          alt_phone: response?.data?.data?.alt_phone || "",
-          alt_email: response?.data?.data?.alt_email || "",
-          company_name: response?.data?.data?.company_name || "",
-          phone_verified: response?.data?.data?.phone_verified || null,
-          email_verified: response?.data?.data?.email_verified || null,
-          alt_phone_code: response?.data?.data?.alt_phone_code || "",
-        });
-      }
+      login(response?.data);
 
       // Show success message or navigate
       toast.success("Profile updated successfully!");
@@ -62,16 +33,18 @@ const EditProfile = () => {
     }
   };
 
-  const handleVerifyEmail = () => {
-    // Email verification logic
-    console.log("Verify email");
-    setEmailVerified(true);
+  const handleVerifyEmail = async () => {
+    setVerifyModal({
+      type: "email",
+      value: user.email,
+    });
   };
 
-  const handleVerifyPhone = () => {
-    // Phone verification logic
-    console.log("Verify phone");
-    setPhoneVerified(true);
+  const handleVerifyPhone = async () => {
+    setVerifyModal({
+      type: "phone",
+      value: user.phone,
+    });
   };
 
   return (
@@ -91,7 +64,18 @@ const EditProfile = () => {
       {/* Form Card */}
       <div className="bg-slate-800/60 backdrop-blur-sm rounded-2xl p-4 sm:p-6 md:p-8 border border-slate-700/70 shadow-xl">
         <Formik
-          initialValues={getInitialValues()}
+          initialValues={{
+            first_name: user?.first_name || "",
+            last_name: user?.last_name || "",
+            email: user?.email || "",
+            phone: user?.phone || "",
+            alt_phone: user?.alt_phone || "",
+            alt_email: user?.alt_email || "",
+            company_name: user?.company_name || "",
+            phone_verified: user?.phone_verified || 0,
+            email_verified: user?.email_verified || 0,
+            alt_phone_code: user?.alt_phone_code || "",
+          }}
           validationSchema={editProfileSchema}
           onSubmit={handleSubmit}
           enableReinitialize
@@ -125,86 +109,54 @@ const EditProfile = () => {
               />
 
               {/* Mobile Number with Verification */}
-              <div>
-                <label className="block text-sm text-gray-300 mb-1.5">
-                  Mobile Number <span className="text-red-400">*</span>
-                </label>
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                  <div className="relative flex-1">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 font-medium">
-                      +91
-                    </span>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formikProps.values.phone}
-                      onChange={formikProps.handleChange}
-                      onBlur={formikProps.handleBlur}
-                      placeholder="Enter 10-digit number"
-                      className={`w-full px-4 py-2.5 pl-14 bg-gray-900/40 rounded-lg text-white placeholder-gray-500 border transition-all duration-200 focus:outline-none ${
-                        formikProps.errors.phone && formikProps.touched.phone
-                          ? "border-red-500 focus:border-red-500"
-                          : "border-gray-700 focus:border-blue-500"
-                      }`}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleVerifyPhone}
-                    className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-lg font-semibold transition-all duration-200 whitespace-nowrap ${
-                      phoneVerified
-                        ? "bg-blue-500/20 text-blue-400 border border-blue-500/30 cursor-default"
-                        : "bg-slate-700 text-white hover:bg-slate-600 border border-slate-600"
-                    }`}
-                  >
-                    {phoneVerified ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <Check size={16} />
-                        Verified
-                      </span>
-                    ) : (
-                      "Verify"
-                    )}
-                  </button>
-                </div>
-                {formikProps.errors.phone && formikProps.touched.phone && (
-                  <p className="mt-1.5 text-sm text-red-500">
-                    {formikProps.errors.phone}
-                  </p>
-                )}
-              </div>
-
-              {/* Alternate Mobile Number */}
-              <div>
-                <label className="block text-sm text-gray-300 mb-1.5">
-                  Alternate Mobile Number
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 font-medium">
-                    +91
-                  </span>
-                  <input
-                    type="tel"
-                    name="alt_phone"
-                    value={formikProps.values.alt_phone}
-                    onChange={formikProps.handleChange}
-                    onBlur={formikProps.handleBlur}
-                    placeholder="Enter alternate mobile number"
-                    className={`w-full px-4 py-2.5 pl-14 bg-gray-900/40 rounded-lg text-white placeholder-gray-500 border transition-all duration-200 focus:outline-none ${
-                      formikProps.errors.alt_phone &&
-                      formikProps.touched.alt_phone
-                        ? "border-red-500 focus:border-red-500"
-                        : "border-gray-700 focus:border-blue-500"
-                    }`}
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-end">
+                <div className="flex-1 w-full">
+                  <MyInput
+                    formikProps={formikProps}
+                    name="phone"
+                    label="Mobile Number"
+                    isRequired={true}
+                    placeholder="Enter 10-digit number"
+                    customType="phone"
                   />
                 </div>
-                {formikProps.errors.alt_phone &&
-                  formikProps.touched.alt_phone && (
-                    <p className="mt-1.5 text-sm text-red-500">
-                      {formikProps.errors.alt_phone}
-                    </p>
+                <button
+                  type="button"
+                  onClick={handleVerifyPhone}
+                  className={`w-full cursor-pointer sm:w-auto px-4 sm:px-6 py-2 rounded-lg font-semibold transition-all duration-200 whitespace-nowrap ${
+                    phoneVerified
+                      ? "bg-blue-500/20 text-blue-400 border border-blue-500/30 cursor-default"
+                      : "bg-slate-700 text-white hover:bg-slate-600 border border-slate-600"
+                  }`}
+                >
+                  {phoneVerified ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Check size={16} />
+                      Verified
+                    </span>
+                  ) : (
+                    "Verify"
                   )}
+                </button>
               </div>
+
+              <MyInput
+                formikProps={formikProps}
+                name="phone"
+                label="Mobile Number"
+                isRequired={true}
+                placeholder="Enter 10-digit number"
+                customType="phone"
+              />
+
+              {/* Alternate Mobile Number */}
+              <MyInput
+                formikProps={formikProps}
+                name="alt_phone"
+                label="Alternate Mobile Number"
+                placeholder="Enter alternate mobile number"
+                customType="phone"
+              />
 
               {/* Email with Verification */}
               <div>
@@ -221,7 +173,7 @@ const EditProfile = () => {
                   <button
                     type="button"
                     onClick={handleVerifyEmail}
-                    className={`w-full sm:w-auto px-4 sm:px-6 py-2 rounded-lg font-semibold transition-all duration-200 whitespace-nowrap ${
+                    className={`w-full cursor-pointer sm:w-auto px-4 sm:px-6 py-2 rounded-lg font-semibold transition-all duration-200 whitespace-nowrap ${
                       emailVerified
                         ? "bg-blue-500/20 text-blue-400 border border-blue-500/30 cursor-default"
                         : "bg-slate-700 text-white hover:bg-slate-600 border border-slate-600"
@@ -260,6 +212,19 @@ const EditProfile = () => {
           )}
         </Formik>
       </div>
+      {verifyModal && (
+        <VerifyOtpModal
+          type={verifyModal.type}
+          value={verifyModal.value}
+          onClose={() => setVerifyModal(null)}
+          onVerified={() => {
+            login({
+              ...user,
+              [`${verifyModal.type}_verified`]: true,
+            });
+          }}
+        />
+      )}
     </div>
   );
 };
